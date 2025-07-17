@@ -1,9 +1,30 @@
-# ieuk-task-2025
-This repo contains the log file for completing the 2025 IEUK Engineering task! The log file is too big to view in browser so you'll need to download it to your local machine. 
+# Log Analyzer
 
-## Download Task
-### Via Github UI 
-https://github.com/user-attachments/assets/81972137-bf32-42c1-bc7d-dc65a0b9398f
+`analyzeLogs.py` analyzes a web server log file to detect suspicious IP addresses based on request frequency and burst behavior.
 
-### Via Git
-You'll need to install Git and the Git LFS extension (which can be found [here](https://git-lfs.com/)). If you're unfamiliar with Git, I wouldn't worry about this—just download the log file via the UI. Using Git is not part of the task, so it's not worth spending too much time on it.
+---
+
+## Included Files
+
+- `analyzeLogs.py` — Python script that processes the log file and prints suspicious IPs.
+- `sample-log.log` — Example log file for testing.
+- `Dockerfile` — Docker configuration to build and run the analyzer easily.
+
+---
+
+## Requirements
+
+- [Docker] installed on your system  
+  **OR**  
+- **Python 3.12.10 or newer** (if running the script directly without Docker)
+
+---
+
+## How to Run
+
+### Option 1: Using Docker
+
+1. Build the Docker image:
+
+   ```bash
+   docker build -t log-analyzer .

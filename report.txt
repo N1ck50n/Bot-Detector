@@ -1,0 +1,39 @@
+Log-Based Activity Detection Report
+
+This report outlines the results of a log analysis aimed at detecting suspicious activity from IP addresses accessing a web service. The purpose was to identify abnormal request patterns that may indicate bot behavior, scraping, or other forms of automated misuse.
+
+Assumptions
+
+    The system under observation is used for music streaming, where high-frequency requests (especially GET) are often legitimate.
+
+    The log format contains identifiable IP addresses and timestamps.
+
+    The company has limited resources and no dedicated bot mitigation infrastructure.
+
+Methodology
+
+A Python script (analyzeLogs.py) was developed to analyze server log files. The script identifies:
+
+    High-volume IPs: Any IP address making over 500 requests during the logging period is flagged as potentially abusive.
+
+    Burst request behavior: IPs making 10 or more requests within 5 seconds are identified using a sliding time window. This pattern is atypical for human interaction and is often associated with automation.
+
+This logic was tested using a sample log file. Thresholds were selected to balance detection sensitivity while minimizing false positives from legitimate users.
+Findings
+
+Multiple IPs were found to exceed 1,000 requests, with some exceeding 5,000. Several also exhibited burst activity. These IPs are strong candidates for automated or scripted traffic.
+Recommendations
+
+    Block or rate-limit suspicious IPs using firewall rules or server-side controls.
+
+    Schedule daily or hourly scans using the provided script to continuously monitor for abuse.
+
+    Automate deployment using Docker for consistency and ease of use.
+
+    Refine thresholds as more behavioral data becomes available to reduce false positives.
+
+    Enforce usage policies to prohibit abusive automated traffic.
+
+Conclusion
+
+This cost-effective, open-source solution provides an actionable way to detect and manage suspicious traffic, helping safeguard system resources without requiring additional infrastructure or services.

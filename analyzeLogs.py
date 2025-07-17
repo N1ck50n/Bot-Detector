@@ -1,19 +1,14 @@
 import re
-from datetime import datetime
-from datetime import timedelta
+from datetime import datetime, timedelta
 
 logFile = "sample-log.log"
 
-# Stores the IP Addresses in a dictionary with their respective counts.
-IPCounts = {}
-
-# Store the IP addresses with their respective times.
-IPTimes = {}
-
 def readLog():
-    # Creates a layout of the IP addresses and the time for the request.
     IPLayout = re.compile(r"^(\d+\.\d+\.\d+\.\d+)") 
     timeLayout = re.compile(r"\[(.*?)\]")
+
+    IPCounts = {}
+    IPTimes = {}
 
     try:
         with open(logFile, "r") as file:
@@ -23,60 +18,45 @@ def readLog():
 
                 if IPmatch:
                     ip = IPmatch.group(1)
-                    # Check if current IP is already stored in the IPCounts dictionary and update the frequency of it.
-                    if ip in IPCounts:
-                        IPCounts[ip] += 1
-                    else:
-                        IPCounts[ip] = 1
+                    IPCounts[ip] = IPCounts.get(ip, 0) + 1
 
-                if timeMatch:
+                if timeMatch and IPmatch:
                     fullTimeRequest = timeMatch.group(1)
-                    timeRequest = datetime.strptime(fullTimeRequest, "%d/%m/%Y:%H:%M:%S")
-                    
-                    
-                    if ip in IPTimes:
-                        IPTimes[ip].append(timeRequest)
-                    else:
-                        IPTimes[ip] = [timeRequest]
+                    try:
+                        timeRequest = datetime.strptime(fullTimeRequest, "%d/%m/%Y:%H:%M:%S")
+                        IPTimes.setdefault(ip, []).append(timeRequest)
+                    except ValueError:
+                        continue  # skip malformed timestamps
 
-                    
     except FileNotFoundError:
         print(f"Could not find '{logFile}'")
 
     return IPCounts, IPTimes
 
 def analyzeLog(IPCounts, IPTimes):
-
-    print("IP Adresses with unusual amount of requests: ")
+    print("🔎 IP Addresses with unusually high request counts (>10):")
     for ip, count in IPCounts.items():
-        # Checks if an IP address appears more than 10 times, showing that it is probably not a user.
         if count > 10:
-            print(f"{ip} : {count}")
+            print(f"  🚩 {ip} made {count} requests")
 
-
-    print("IP Addresses with suspicious quick repeated requests:")
-    timeInterval = 5
+    print("\n📈 IP Addresses with bursts (>=10 requests within 5 seconds):")
+    timeInterval = 5  # seconds
+    threshold = 10
 
     for ip, times in IPTimes.items():
         times.sort()
         start = 0
-        
         for end in range(len(times)):
-            # Move start pointer while time interval is more than 5 seconds.
             while times[end] - times[start] > timedelta(seconds=timeInterval):
                 start += 1
-           
-            # Number of requests in the current window.
             requestCount = end - start + 1
-
-            if requestCount >= 10:
-                print(f"{ip} made {requestCount} requests within 5 seconds")
-                
-                # Break to reduce excessive output.
-                break  
-
+            if requestCount >= threshold:
+                print(f"  🚨 {ip} made {requestCount} requests within {timeInterval} seconds")
+                break  # only show each IP once
 
 def main():
     IPCounts, IPTimes = readLog()
     analyzeLog(IPCounts, IPTimes)
 
+if __name__ == "__main__":
+    main()
